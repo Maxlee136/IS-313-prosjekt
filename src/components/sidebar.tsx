@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Dumbbell, BarChart2, LogOut, Home} from 'lucide-react'
+import { Dumbbell, BarChart2, LogOut} from 'lucide-react'
 
 export function Sidebar() {
     const pathname = usePathname()
@@ -13,7 +13,6 @@ export function Sidebar() {
     const navItems = [
         { href: "/dashboard", icon: BarChart2, label: "Dashboard" },
         { href: "/exercise-selection", icon: Dumbbell, label: "Exercises" },
-        { href: "/", icon: Home, label: "Home" },
     ]
 
     return (
