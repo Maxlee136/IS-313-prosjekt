@@ -1,9 +1,0 @@
-{
-  "rules": {
-    "no-unused-vars": "off",
-    "no-console": "off",
-    "@typescript-eslint/no-empty-interface": "off",
-    "@typescript-eslint/no-empty-function": "off"
-    // You can disable all other rules similarly
-  }
-}
