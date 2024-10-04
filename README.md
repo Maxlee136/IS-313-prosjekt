@@ -19,7 +19,7 @@ npm install
 Kjør dermed
 
 ```
-npm start
+npm run dev
 ```
 Appen vil nå kjør i utviklermodus
 Åpne [http://localhost:3000](http://localhost:3000)
