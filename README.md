@@ -4,7 +4,7 @@
 2. Start med å kjøre git clone i  også  for å klone repoistory til din lokale datamaskin
 
 # Requirements
-- Node må være installert på Pc - en
+- Node må være installert på pc - en
 - Arduino IDE for å kunne kjøre arduino koden
 
 
