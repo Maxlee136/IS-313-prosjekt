@@ -1,6 +1,6 @@
 # KOM IGANG MED PROSJEKTET
 
-1. Lag en mappe på pcen kallt emg-reps-counter
+1. Lag en mappe på pcen kallt is-313-prosjekt
 2. Start med å kjøre git clone i  også  for å klone repoistory til din lokale datamaskin
 
 # Requirements
@@ -9,10 +9,10 @@
 
 
 
-Når du har klonet repository sørg for at du er i emg-reps-counter mappen
+Når du har klonet repository sørg for at du er i is-313-prosjekt mappen
 
 ### 
-Kjør kommandoen i emg-reps-counter mappen for å sørge for at du har nyeste versjon av node modules.
+Kjør kommandoen i is-313-prosjekt mappen for å sørge for at du har nyeste versjon av node modules.
 ```
 npm install
 ```
