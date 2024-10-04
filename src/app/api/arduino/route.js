@@ -1,3 +1,11 @@
+export async function POST(req) {
+    const body = await req.json();
 
-
-// Define the handler function for the API route
+    return new Response(JSON.stringify({
+        message: 'Received POST request!',
+        body: body,
+    }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+    });
+}

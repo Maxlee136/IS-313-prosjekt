@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { io, Socket } from 'socket.io-client'
 import { Line } from 'react-chartjs-2'
@@ -33,7 +33,15 @@ ChartJS.register(
 
 let socket: Socket
 
-export default function WorkoutDashboard() {
+export default function Page() {
+    return (
+        <Suspense fallback={<div>Loading workout dashboard...</div>}>
+            <WorkoutDashboard />
+        </Suspense>
+    )
+}
+
+function WorkoutDashboard() {
     const searchParams = useSearchParams()
     const exercise = searchParams.get('exercise') || 'Unknown Exercise'
 
