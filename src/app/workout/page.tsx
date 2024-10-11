@@ -191,11 +191,10 @@ function WorkoutDashboard() {
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-6">
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-3 gap-4">
                                         <StatItem icon={<Target />} label="Current Set" value={setCount + 1} />
-                                        <StatItem icon={<Trophy />} label="Total Reps" value={totalReps} />
-                                        <StatItem icon={<Flame />} label="Calories Burned" value={caloriesBurned} />
-                                        <StatItem icon={<Dumbbell />} label="Personal Best" value={personalBest} />
+                                        <StatItem icon={<Dumbbell />} label="Total Reps" value={totalReps} />
+                                        <StatItem icon={<Trophy />} label="Personal Best" value={personalBest} />
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-gray-500">Current Set Reps</p>
@@ -252,7 +251,7 @@ function WorkoutDashboard() {
 
 function StatItem({ icon, label, value }: { icon: React.ReactNode, label: string, value: number }) {
     return (
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center min-h-[100px]">
             <div className="text-primary mb-1">{icon}</div>
             <p className="text-sm font-medium text-gray-500">{label}</p>
             <p className="text-lg font-bold text-primary">{value}</p>

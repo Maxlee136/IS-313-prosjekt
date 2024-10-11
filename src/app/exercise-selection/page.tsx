@@ -16,7 +16,8 @@ const exercises = [
     "Leg extension",
     "Squat",
     "Deadlift",
-    "Shoulder press"
+    "Shoulder press",
+    "Rowing"
 ]
 
 export default function ExerciseSelectionPage() {
