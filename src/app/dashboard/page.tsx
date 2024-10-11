@@ -32,8 +32,7 @@ export default function DashboardPage() {
                     <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                         <StatCard icon={<Dumbbell className="h-6 w-6" />} title="Total Workouts" value={totalWorkouts} />
-                        <StatCard icon={<Flame className="h-6 w-6" />} title="Calories Burned" value={`${caloriesBurned} kcal`} />
-                        <StatCard icon={<Trophy className="h-6 w-6" />} title="Current Streak" value={`${streak} days`} />
+                        <StatCard icon={<Flame className="h-6 w-6" />} title="Current Streak" value={`${streak} days`} />
                         <StatCard icon={<Target className="h-6 w-6" />} title="Weekly Goal" value={`${weeklyGoal}/5 workouts`} />
                     </div>
                     <Card className="mt-6">
