@@ -5,15 +5,17 @@ import { usePathname } from 'next/navigation'
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Dumbbell, BarChart2, LogOut} from 'lucide-react'
+import { Dumbbell, BarChart2, LogOut } from 'lucide-react'
+import { UserButton, useUser } from "@clerk/nextjs";
 
 export function Sidebar() {
-    const pathname = usePathname()
+    const pathname = usePathname();
+    const { user } = useUser(); // Fetch user information
 
     const navItems = [
         { href: "/dashboard", icon: BarChart2, label: "Dashboard" },
         { href: "/exercise-selection", icon: Dumbbell, label: "Exercises" },
-    ]
+    ];
 
     return (
         <>
@@ -37,17 +39,30 @@ export function Sidebar() {
                         ))}
                     </nav>
                 </ScrollArea>
-                <div className="p-4">
-                    <Button variant="outline" className="w-full justify-start">
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Log out
-                    </Button>
+                <div className="p-4 flex items-center justify-between">
+                    {/* User information section */}
+                    <div className="flex items-center space-x-4">
+                        <UserButton appearance={{
+                            elements: {
+                                userButtonAvatarBox: 'w-10 h-10',
+                            },
+                        }} />
+                        {/* Check if the user is defined and display username or fallback */}
+                        <span className="text-sm font-medium">
+                            {user?.username || user?.firstName || 'User'}
+                        </span>
+                    </div>
                 </div>
             </div>
 
             {/* Mobile Tabbar */}
             <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t">
                 <nav className="flex justify-around items-center h-16">
+                    <UserButton appearance={{
+                        elements: {
+                            userButtonAvatarBox: 'w-10 h-10',
+                        },
+                    }} />
                     {navItems.map((item) => (
                         <Link key={item.href} href={item.href} passHref>
                             <Button variant="ghost" className={cn(
@@ -62,5 +77,5 @@ export function Sidebar() {
                 </nav>
             </div>
         </>
-    )
+    );
 }

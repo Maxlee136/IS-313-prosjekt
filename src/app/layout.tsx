@@ -1,22 +1,35 @@
-import './globals.css'
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+// import Clerk components and providers
+import { ClerkProvider, SignInButton, SignedIn, SignedOut, RedirectToSignIn } from '@clerk/nextjs';
+import './globals.css';
+import { Inter } from 'next/font/google';
 
-const inter = Inter({ subsets: ['latin'] })
+// Define your font
+const inter = Inter({ subsets: ['latin'] });
 
-export const metadata: Metadata = {
-  title: 'Gamer Gunz',
-  description: 'Level up your fitness game with Gamer Gunz',
-}
+// Set metadata
+export const metadata = {
+    title: 'Gamer Gunz',
+    description: 'Level up your fitness game with Gamer Gunz',
+};
 
+// RootLayout component with Clerk protection
 export default function RootLayout({
-                                     children,
+                                       children,
                                    }: {
-  children: React.ReactNode
+    children: React.ReactNode
 }) {
-  return (
-      <html lang="en">
-      <body className={inter.className}>{children}</body>
-      </html>
-  )
+    return (
+        <ClerkProvider>
+            <html lang="en">
+            <body className={inter.className}>
+            <SignedOut>
+                <RedirectToSignIn />
+            </SignedOut>
+            <SignedIn>
+                {children}
+            </SignedIn>
+            </body>
+            </html>
+        </ClerkProvider>
+    );
 }
