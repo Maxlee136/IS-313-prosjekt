@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Dumbbell, Play, Pause, SkipForward, StopCircle } from 'lucide-react';
+import { Sidebar } from "@/components/sidebar";
 
 import {
     Chart as ChartJS,
@@ -33,7 +34,6 @@ export default function WorkoutDashboard() {
     const [isPaused, setIsPaused] = useState<boolean>(false);
     const [totalReps, setTotalReps] = useState<number>(0);
 
-
     const handleStartWorkout = () => {
         setIsWorkoutActive(true);
         setIsPaused(false);
@@ -52,7 +52,8 @@ export default function WorkoutDashboard() {
     const handleNextSet = () => {
         setSetCount((prev) => prev + 1);
         setRepCount(0);
-        socket.emit('nextSet');
+        socket.emit('nextSet'); // Emit the next set event
+        socket.emit('resetReps'); // Emit reset command to Arduino explicitly
     };
 
     const handleEndWorkout = () => {
@@ -92,102 +93,104 @@ export default function WorkoutDashboard() {
     };
 
     useEffect(() => {
-        let lastRepCount = 0; // Keep track of the last rep count
+        let lastRepCount = 0;
 
-        // Connect to the Express server via Socket.IO
-        socket = io('http://localhost:8080'); // Replace with your server address if deployed
+        socket = io('http://localhost:8080');
 
-        // Listen for real-time data from the Arduino via Socket.IO
         socket.on('arduino-data', (data) => {
-            // Calculate the difference between the new rep count and the last rep count
-            const newReps = data.repCount - lastRepCount;
-
-            // Only add positive differences to total reps
-            if (newReps > 0) {
-                setTotalReps((prev) => prev + newReps);
+            if (isWorkoutActive && !isPaused) {
+                const newReps = data.repCount - lastRepCount;
+                if (newReps > 0) {
+                    setTotalReps((prev) => prev + newReps);
+                }
+                setRepCount(data.repCount);
+                setSensorValue(data.sensorValue);
+                setMuscleActivation((prev) => [...prev, data.sensorValue]);
+                lastRepCount = data.repCount;
             }
+        });
 
-            // Update the rep count and sensor value in the state
-            setRepCount(data.repCount);
-            setSensorValue(data.sensorValue);
-            setMuscleActivation((prev) => [...prev, data.sensorValue]);
-
-            // Update lastRepCount to the current rep count
-            lastRepCount = data.repCount;
+        socket.on('resetReps', () => {
+            setRepCount(0);
+            lastRepCount = 0;
         });
 
         return () => {
             socket.disconnect();
         };
-    }, []);
+    }, [isWorkoutActive, isPaused]);
 
 
     return (
-        <div className="container mx-auto p-4 bg-gray-100 min-h-screen">
-            <h1 className="text-4xl font-bold mb-6 text-center text-primary">Workout Dashboard</h1>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="shadow-lg">
-                    <CardHeader>
-                        <CardTitle className="flex items-center">
-                            <Dumbbell className="mr-2" /> Workout Stats
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-6">
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500">Current Set</p>
-                                    <p className="text-3xl font-bold text-primary">{setCount + 1}</p>
+        <div className="flex min-h-screen">
+            <Sidebar />
+
+            <div className="flex-1 container mx-auto p-4 bg-gray-100">
+                <h1 className="text-4xl font-bold mb-6 text-center text-primary">Workout Dashboard</h1>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Card className="shadow-lg">
+                        <CardHeader>
+                            <CardTitle className="flex items-center">
+                                <Dumbbell className="mr-2" /> Workout Stats
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-500">Current Set</p>
+                                        <p className="text-3xl font-bold text-primary">{setCount + 1}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-500">Total Reps</p>
+                                        <p className="text-3xl font-bold text-primary">{totalReps}</p>
+                                    </div>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-gray-500">Total Reps</p>
-                                    <p className="text-3xl font-bold text-primary">{totalReps}</p>
+                                    <p className="text-sm font-medium text-gray-500">Current Set Reps</p>
+                                    <p className="text-5xl font-bold text-center my-4 text-primary">{repCount}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-gray-500 mb-2">Muscle Activation</p>
+                                    <Progress value={sensorValue} className="w-full h-4" />
                                 </div>
                             </div>
-                            <div>
-                                <p className="text-sm font-medium text-gray-500">Current Set Reps</p>
-                                <p className="text-5xl font-bold text-center my-4 text-primary">{repCount}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-gray-500 mb-2">Muscle Activation</p>
-                                <Progress value={sensorValue} className="w-full h-4" />
-                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card className="shadow-lg">
+                        <CardHeader>
+                            <CardTitle>Muscle Activation Graph</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Line data={chartData} options={chartOptions} />
+                        </CardContent>
+                    </Card>
+                </div>
+                <Card className="mt-6 shadow-lg">
+                    <CardContent className="p-6">
+                        <div className="flex flex-wrap justify-center gap-4">
+                            {!isWorkoutActive ? (
+                                <Button onClick={handleStartWorkout} className="w-full sm:w-auto" size="lg">
+                                    <Play className="mr-2 h-4 w-4" /> Start Workout
+                                </Button>
+                            ) : (
+                                <>
+                                    <Button onClick={handlePauseResume} className="w-full sm:w-auto" size="lg">
+                                        {isPaused ? <Play className="mr-2 h-4 w-4" /> : <Pause className="mr-2 h-4 w-4" />}
+                                        {isPaused ? 'Resume' : 'Pause'}
+                                    </Button>
+                                    <Button onClick={handleNextSet} className="w-full sm:w-auto" size="lg">
+                                        <SkipForward className="mr-2 h-4 w-4" /> Next Set
+                                    </Button>
+                                    <Button onClick={handleEndWorkout} variant="destructive" className="w-full sm:w-auto" size="lg">
+                                        <StopCircle className="mr-2 h-4 w-4" /> End Workout
+                                    </Button>
+                                </>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="shadow-lg">
-                    <CardHeader>
-                        <CardTitle>Muscle Activation Graph</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Line data={chartData} options={chartOptions} />
-                    </CardContent>
-                </Card>
             </div>
-            <Card className="mt-6 shadow-lg">
-                <CardContent className="p-6">
-                    <div className="flex flex-wrap justify-center gap-4">
-                        {!isWorkoutActive ? (
-                            <Button onClick={handleStartWorkout} className="w-full sm:w-auto" size="lg">
-                                <Play className="mr-2 h-4 w-4" /> Start Workout
-                            </Button>
-                        ) : (
-                            <>
-                                <Button onClick={handlePauseResume} className="w-full sm:w-auto" size="lg">
-                                    {isPaused ? <Play className="mr-2 h-4 w-4" /> : <Pause className="mr-2 h-4 w-4" />}
-                                    {isPaused ? 'Resume' : 'Pause'}
-                                </Button>
-                                <Button onClick={handleNextSet} className="w-full sm:w-auto" size="lg">
-                                    <SkipForward className="mr-2 h-4 w-4" /> Next Set
-                                </Button>
-                                <Button onClick={handleEndWorkout} variant="destructive" className="w-full sm:w-auto" size="lg">
-                                    <StopCircle className="mr-2 h-4 w-4" /> End Workout
-                                </Button>
-                            </>
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
         </div>
     );
 }

@@ -16,36 +16,63 @@ const io = new Server(server, {
 
 app.use(cors());
 
-// Replace '/dev/cu.usbmodemDC5475C4F2602' with your Arduino's serial port path
 const port = new SerialPort({
-    path: '/dev/cu.usbmodemDC5475C4F2602', // Ensure this is the correct path
-    baudRate: 19200, // Updated to match your Arduino code
+    path: '/dev/cu.usbmodemDC5475C4F2602',
+    baudRate: 19200,
 });
 
 const parser = port.pipe(new ReadlineParser({ delimiter: '\n' }));
 
-// Variables to hold latest repetition count and sensor value
 let repCount = 0;
 let sensorValue = 0;
+let isPaused = false;
 
-// When data is received from the Arduino
 parser.on('data', (data) => {
     try {
-        // Parse the data
         const sensorData = data.trim();
 
-        // Check if the data includes a repetition count
-        if (sensorData.startsWith("Repetition Count:")) {
-            repCount = parseInt(sensorData.split(": ")[1], 10);
-            console.log(`Repetition Count: ${repCount}`);
-        } else if (sensorData.startsWith("Sensor Value:")) {
-            sensorValue = parseInt(sensorData.split(": ")[1], 10);
-            console.log(`Sensor Value: ${sensorValue}`);
+        if (sensorData.startsWith("WorkoutEnded:")) {
+            repCount = 0;
+            sensorValue = 0;
+            isPaused = false;
+            io.emit('workoutEnded');
+            io.emit('arduino-data', { repCount: 0, sensorValue: 0 });
+            console.log('Workout ended, all counters reset');
         }
-
-        // Emit both repCount and sensorValue together
-        io.emit('arduino-data', { repCount, sensorValue });
-
+        else if (sensorData.startsWith("WorkoutPaused:")) {
+            isPaused = true;
+            io.emit('workoutPaused');
+            console.log('Workout paused');
+        }
+        else if (sensorData.startsWith("WorkoutResumed:")) {
+            isPaused = false;
+            io.emit('workoutResumed');
+            console.log('Workout resumed');
+        }
+        else if (sensorData.startsWith("RepsReset:")) {
+            repCount = 0;
+            io.emit('arduino-data', { repCount: 0, sensorValue });
+            console.log('Reps reset acknowledged by Arduino');
+        }
+        else if (sensorData.startsWith("SensorValue:")) {
+            const newSensorValue = parseInt(sensorData.split(":")[1], 10);
+            if (!isNaN(newSensorValue)) {
+                sensorValue = newSensorValue;
+                // Always emit sensor value updates
+                io.emit('arduino-data', { repCount, sensorValue });
+                console.log(`Sensor Value: ${sensorValue}`);
+            }
+        }
+        else if (sensorData.startsWith("RepCount:")) {
+            if (!isPaused) {
+                const newRepCount = parseInt(sensorData.split(":")[1], 10);
+                if (!isNaN(newRepCount)) {
+                    repCount = newRepCount;
+                    io.emit('arduino-data', { repCount, sensorValue });
+                    console.log(`Repetition Count: ${repCount}`);
+                }
+            }
+        }
     } catch (err) {
         console.error('Failed to parse data:', err);
     }
@@ -53,9 +80,38 @@ parser.on('data', (data) => {
 
 io.on('connection', (socket) => {
     console.log('A user connected');
+
+    // Send initial state to newly connected clients
+    socket.emit('arduino-data', { repCount, sensorValue });
+
+    socket.on('startWorkout', () => {
+        console.log('Start workout command received');
+        port.write('S');
+        isPaused = false;
+    });
+
+    socket.on('pauseWorkout', () => {
+        console.log('Pause workout command received');
+        port.write('P');
+    });
+
+    socket.on('resumeWorkout', () => {
+        console.log('Resume workout command received');
+        port.write('S');
+    });
+
+    socket.on('nextSet', () => {
+        console.log('Next set command received');
+        port.write('N');
+        isPaused = false;
+    });
+
+    socket.on('endWorkout', () => {
+        console.log('End workout command received');
+        port.write('E');
+    });
 });
 
-// Change the server port to 8080
 server.listen(8080, () => {
     console.log('Server running on http://localhost:8080');
 });
