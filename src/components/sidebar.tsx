@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation'
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Dumbbell, BarChart2, LogOut } from 'lucide-react'
 import { UserButton, useUser } from "@clerk/nextjs";
 import { Dumbbell, BarChart2, LogOut, Eye} from 'lucide-react'
 
@@ -16,9 +15,9 @@ export function Sidebar() {
     const navItems = [
         { href: "/dashboard", icon: BarChart2, label: "Dashboard" },
         { href: "/exercise-selection", icon: Dumbbell, label: "Exercises" },
+        { href: "/history", icon: Eye, label: "History"},
     ];
-        { href: "/history", icon: Eye, label: "History"}
-    ]
+
 
     return (
         <>
