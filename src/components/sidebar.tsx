@@ -24,7 +24,7 @@ export function Sidebar() {
             {/* Desktop Sidebar */}
             <div className="hidden md:flex md:flex-col md:h-screen md:border-r md:bg-muted/40 md:w-64">
                 <div className="p-6">
-                    <h2 className="text-2xl font-semibold tracking-tight">Gamer Gunz</h2>
+                    <h2 className="text-2xl font-semibold tracking-tight">A-fit</h2>
                 </div>
                 <ScrollArea className="flex-1">
                     <nav className="grid items-start px-4 text-sm font-medium">
