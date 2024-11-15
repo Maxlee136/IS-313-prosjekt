@@ -8,8 +8,8 @@ const inter = Inter({ subsets: ['latin'] });
 
 // Set metadata
 export const metadata = {
-    title: 'Gamer Gunz',
-    description: 'Level up your fitness game with Gamer Gunz',
+    title: 'A-fit',
+    description: 'Level up your fitness game with A-fit',
 };
 
 // RootLayout component with Clerk protection
